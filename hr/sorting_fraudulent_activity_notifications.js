@@ -1,4 +1,4 @@
-function createSortedLinkedList (arr) {
+function makeSortedLinkedList (arr) {
   function createNode(value) {
     return {
       value,
@@ -9,8 +9,8 @@ function createSortedLinkedList (arr) {
   let head
   let pointer
 
-  for (let index = 0; index < arr.length; index++) {
-    const newNode = createNode(arr[i])
+  arr.sort().forEach(function(item) {
+    const newNode = createNode(item)
 
     if (!head) {
       head = newNode
@@ -18,11 +18,12 @@ function createSortedLinkedList (arr) {
 
     if (pointer) {
       pointer.next = newNode
+      pointer = pointer.next
     } else {
       pointer = newNode
     }
-  }
-  
+  })
+
   function removeNode(value) {
     if (head.value === value) {
       head = head.next     
@@ -30,7 +31,7 @@ function createSortedLinkedList (arr) {
       return
     }
 
-    const pointer = head
+    let pointer = head
 
     while (pointer) {
       if (pointer.next && pointer.next.value === value) {
@@ -41,47 +42,93 @@ function createSortedLinkedList (arr) {
     }
   }
 
-  function inserNode(value) {
-    const pointer = head
+  function addNode(value) {
+    let pointer = head
+    let added = false
 
-    while(pointer) {
-      if (pointer.value <= value && pointer.next > value) {
+    while(pointer && !added) {
+      if (
+        pointer.value <= value && pointer.next && pointer.next.value >= value
+        || pointer.next === null
+      ) {
         const next = pointer.next
         pointer.next = createNode(value)
         pointer.next.next = next
+        added = true
       }
+      pointer = pointer.next
     }
   }
 
+  function getNodeByIndex(index) {
+    if (index === 0) {
+      return head
+    }
+
+    let pointer = head;
+    let count = 0
+
+    while (pointer.next && count !== index) {
+      pointer = pointer.next
+      count++
+    }
+
+    return pointer
+  }
+
+  function getList() {
+    let arr = []
+
+    let pointer = head
+
+    while (pointer.next) {
+      arr.push(pointer.value)
+      pointer = pointer.next
+    }
+
+    return arr
+  }
+
   return {
-    insertNode,
-    removeNode
+    addNode,
+    removeNode,
+    getNodeByIndex,
+    getList
   }
 }
 
-function getMedian(arr) {
-  const half = Math.floor(arr.length / 2)
+function getMedian(list, d) {
+  const half = Math.floor(d / 2)
+  const odd = d % 2
 
-  if (arr.length % 2) {
-    return arr[half]
+  if (odd) {
+    return list.getNodeByIndex(half).value
   }
 
-  return (arr[half - 1] + arr[half]) / 2
+  return (list.getNodeByIndex(half - 1).value + list.getNodeByIndex(half).value) / 2
 }
 
 function activityNotifications(expenditure, d) {
   let count = 0
+  const list = makeSortedLinkedList(expenditure.slice(0, d + 1))
 
   for (let index = d; index < expenditure.length; index++) {
-    if (
+   if (
       (index < expenditure.length - 1) &&
-      getMedian(expenditure.slice(index - d, index).sort()) <= expenditure[index] / 2
+      getMedian(list, d) <= expenditure[index] / 2
     ) {
-      count++  
-    }   
+      count++
+    }
+
+    if (index + 1 < expenditure.length) {
+      list.removeNode(expenditure[index - d])
+      list.addNode(expenditure[index + 1])
+    }
   }
+
   return count
 }
 
-console.log(activityNotifications([1, 2, 3, 4, 4], 4))
-console.log(activityNotifications([2, 3, 4, 2, 3, 6, 8, 4, 5], 5))
+// console.log(activityNotifications([1, 2, 3, 4, 4], 4))
+// console.log(activityNotifications([2, 3, 4, 2, 3, 6, 8, 4, 5], 5))
+console.log(activityNotifications([0, 0, 0, 0, 0], 1))
