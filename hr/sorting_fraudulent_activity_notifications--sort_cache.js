@@ -13,6 +13,8 @@ function getMedian(list, d) {
     return list[half]
   }
 
+  // console.log('list[half - 1] + list[half])', list[half - 1], list[half])
+
   return (list[half - 1] + list[half]) / 2
 }
 
@@ -99,6 +101,8 @@ function activityNotifications(expenditure, d) {
 
   for (let index = d; index < expenditure.length; index++) {
     const median = getMedian(list, d);
+    // console.log('median', median)
+    // fs.writeFileSync('./test', `${median}\n`, { flag: 'a' });
 
     // console.log('iterate ', median, list)
 
@@ -113,6 +117,8 @@ function activityNotifications(expenditure, d) {
     if (index + 1 < expenditure.length) {
       addAndRemoveFromList(list, expenditure[index], expenditure[index - d]);
     }
+
+    // return
   }
 
   return count
